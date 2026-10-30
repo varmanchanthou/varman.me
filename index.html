@@ -510,6 +510,8 @@
     <video
       id="transition-stage-video"
       class="absolute inset-0 w-full h-full object-cover object-center"
+      muted
+      preload="auto"
       playsinline webkit-playsinline="true" x5-playsinline="true"
     ></video>
     <div class="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/65 pointer-events-none"></div>
@@ -623,7 +625,9 @@
         id="intro-cambodia-video"
         src="intro_cambodia.mp4"
         autoplay
+        muted
         loop
+        preload="auto"
         playsinline webkit-playsinline="true" x5-playsinline="true"
         class="w-full h-full object-cover object-center"
       ></video>
@@ -732,7 +736,9 @@
       <video
         id="bg-video-home"
         src="bg_home_space.mp4"
+        muted
         loop
+        preload="auto"
         playsinline webkit-playsinline="true" x5-playsinline="true"
         class="w-full h-full object-cover object-center opacity-90 transition-opacity duration-700"
       ></video>
@@ -741,7 +747,9 @@
       <video
         id="bg-video-about"
         src="bg_about_physics.mp4"
+        muted
         loop
+        preload="auto"
         playsinline webkit-playsinline="true" x5-playsinline="true"
         class="hidden w-full h-full object-cover object-center opacity-80 transition-opacity duration-700"
       ></video>
@@ -752,6 +760,7 @@
         src="bg_business_economy.mp4"
         muted
         loop
+        preload="auto"
         playsinline webkit-playsinline="true" x5-playsinline="true"
         class="hidden w-full h-full object-cover object-center opacity-75 transition-opacity duration-700"
       ></video>
@@ -1960,21 +1969,101 @@
         }, 560);
       }
 
+      // Convert embedded base64 data:video/mp4 and data:audio/mpeg URIs into native Blob Object URLs
+      // so iPhone (iOS Safari AVPlayer) and Android Chrome can byte-range stream and seek them natively!
+      function hydrateBase64MediaToBlobUrls() {
+        document.querySelectorAll('video, audio').forEach(function (el) {
+          const src = el.getAttribute('src') || '';
+          if (src.indexOf('data:') === 0 && src.indexOf(';base64,') !== -1) {
+            try {
+              const parts = src.split(';base64,');
+              const mime = parts[0].slice(5);
+              const bstr = atob(parts[1]);
+              let n = bstr.length;
+              const u8 = new Uint8Array(n);
+              while (n--) {
+                u8[n] = bstr.charCodeAt(n);
+              }
+              const blob = new Blob([u8], { type: mime });
+              el.src = URL.createObjectURL(blob);
+            } catch (e) {}
+          }
+          if (el.tagName === 'VIDEO') {
+            el.playsInline = true;
+            el.setAttribute('playsinline', '');
+            el.setAttribute('webkit-playsinline', 'true');
+          }
+        });
+      }
+
+      // Mobile-safe media playback:
+      // On iOS Safari & Android, looping background <video> elements must start playing muted first
+      // so mobile browsers never block or pause them when triggered by timers, then unmute if allowed!
       function safePlayMedia(mediaEl, vol, mutedFallback) {
         if (!mediaEl) return;
         try {
-          mediaEl.volume = soundEnabled ? Math.max(0, Math.min(1, vol)) : 0;
-          mediaEl.muted = !soundEnabled;
-          const p = mediaEl.play();
-          if (p && typeof p.catch === 'function') {
-            p.catch(function () {
-              if (mutedFallback !== false) {
+          const isVideo = mediaEl.tagName === 'VIDEO';
+          const targetVol = soundEnabled ? Math.max(0, Math.min(1, vol)) : 0;
+
+          if (isVideo && mutedFallback !== false) {
+            mediaEl.playsInline = true;
+            // Start video muted first so iPhone/Android guarantees immediate frame playback
+            mediaEl.muted = true;
+            const p = mediaEl.play();
+            if (p && typeof p.then === 'function') {
+              p.then(function () {
+                if (soundEnabled && targetVol > 0) {
+                  try {
+                    mediaEl.volume = targetVol;
+                    mediaEl.muted = false;
+                    // If iOS Safari pauses the video when unmuted outside a tap gesture, immediately keep playing muted!
+                    setTimeout(function () {
+                      if (mediaEl.paused) {
+                        mediaEl.muted = true;
+                        mediaEl.play().catch(function () {});
+                      }
+                    }, 40);
+                  } catch (e) {
+                    mediaEl.muted = true;
+                    mediaEl.play().catch(function () {});
+                  }
+                }
+              }).catch(function () {
                 mediaEl.muted = true;
                 mediaEl.play().catch(function () {});
-              }
-            });
+              });
+            }
+          } else {
+            mediaEl.volume = targetVol;
+            mediaEl.muted = !soundEnabled || targetVol === 0;
+            const p = mediaEl.play();
+            if (p && typeof p.catch === 'function') {
+              p.catch(function () {
+                if (mutedFallback !== false) {
+                  mediaEl.muted = true;
+                  mediaEl.play().catch(function () {});
+                }
+              });
+            }
           }
         } catch (e) {}
+      }
+
+      // Prime all background video/audio elements during a direct user tap so iOS Safari marks them user-activated
+      let mobileMediaPrimed = false;
+      function primeAllMobileMediaOnTap() {
+        if (mobileMediaPrimed) return;
+        mobileMediaPrimed = true;
+        ['bg-video-home', 'bg-video-about', 'bg-video-business'].forEach(function (id) {
+          const v = document.getElementById(id);
+          if (v && v.paused) {
+            v.muted = true;
+            const p = v.play();
+            if (p && typeof p.then === 'function') {
+              p.then(function () { v.pause(); }).catch(function () {});
+            }
+          }
+        });
       }
 
       function stopAllBackgroundMedia() {
@@ -2083,96 +2172,113 @@
 
         let isFinishing = false;
 
-        // 1. Fade to pure black first, start the transition video cleanly, then fade out from black
-        if (curtain) curtain.classList.add('fade-active');
+        // Prime background videos synchronously inside this user tap so iOS Safari unlocks them
+        primeAllMobileMediaOnTap();
+        stopAllBackgroundMedia();
+        stopApsaraCinematicSound();
 
-        setTimeout(function () {
-          stopAllBackgroundMedia();
-          stopApsaraCinematicSound();
+        // Set black curtain to 100% black immediately and fades out smoothly once video starts
+        if (curtain) {
+          curtain.style.transition = 'none';
+          curtain.classList.add('fade-active');
+          void curtain.offsetWidth;
+          curtain.style.transition = '';
+        }
 
-          if (badgeEl) badgeEl.textContent = config.badge || 'CINEMATIC TRANSITION';
-          if (khmerEl) {
-            const khmerText = config.khmer || '';
-            khmerEl.textContent = khmerText;
-            khmerEl.classList.toggle('hidden', !khmerText);
-          }
-          if (titleEl) titleEl.textContent = config.title || 'WELCOME';
-          if (subEl) subEl.textContent = config.subtitle || '';
-          if (labelEl) labelEl.textContent = config.loadingLabel || 'LOADING...';
-          if (pctEl) pctEl.textContent = '0%';
-          if (barEl) barEl.style.width = '0%';
+        if (badgeEl) badgeEl.textContent = config.badge || 'CINEMATIC TRANSITION';
+        if (khmerEl) {
+          const khmerText = config.khmer || '';
+          khmerEl.textContent = khmerText;
+          khmerEl.classList.toggle('hidden', !khmerText);
+        }
+        if (titleEl) titleEl.textContent = config.title || 'WELCOME';
+        if (subEl) subEl.textContent = config.subtitle || '';
+        if (labelEl) labelEl.textContent = config.loadingLabel || 'LOADING...';
+        if (pctEl) pctEl.textContent = '0%';
+        if (barEl) barEl.style.width = '0%';
 
+        // CRITICAL FOR iPHONE / iOS SAFARI:
+        // Assign src and call play() SYNCHRONOUSLY inside the user's tap event (0ms, no setTimeout before play!)
+        stageVid.playsInline = true;
+        stageVid.setAttribute('playsinline', '');
+        stageVid.setAttribute('webkit-playsinline', 'true');
+        if (stageVid.src !== srcEl.src) {
           stageVid.src = srcEl.src;
-          stageVid.currentTime = 0;
+        }
+        try { stageVid.currentTime = 0; } catch (e) {}
 
-          const kfpAudio = document.getElementById('kfp-continues-audio');
-          if (config.startKfpFullAudio && kfpAudio) {
-            stageVid.muted = true;
-            kfpAudio.currentTime = 0;
-            safePlayMedia(kfpAudio, 0.75, false);
-          } else if (config.sourceElementId === 'src-vid-apsara') {
-            stageVid.muted = true;
-            stageVid.volume = 0;
-            playApsaraCinematicSound();
-          } else if (config.muted || config.volume === 0) {
-            stageVid.muted = true;
-            stageVid.volume = 0;
-          } else {
-            stageVid.muted = !soundEnabled;
-            stageVid.volume = soundEnabled ? (config.volume !== undefined ? config.volume : 0.75) : 0;
-          }
+        const kfpAudio = document.getElementById('kfp-continues-audio');
+        if (config.startKfpFullAudio && kfpAudio) {
+          stageVid.muted = true;
+          try { kfpAudio.currentTime = 0; } catch (e) {}
+          safePlayMedia(kfpAudio, 0.75, false);
+        } else if (config.sourceElementId === 'src-vid-apsara') {
+          stageVid.muted = true;
+          stageVid.volume = 0;
+          playApsaraCinematicSound();
+        } else if (config.muted || config.volume === 0) {
+          stageVid.muted = true;
+          stageVid.volume = 0;
+        } else {
+          stageVid.muted = !soundEnabled;
+          stageVid.volume = soundEnabled ? (config.volume !== undefined ? config.volume : 0.75) : 0;
+        }
 
-          stage.classList.add('active');
-          try {
-            stageVid.play().catch(function () {
+        stage.classList.add('active');
+        try {
+          const playPromise = stageVid.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function () {
               stageVid.muted = true;
               stageVid.play().catch(function () {});
             });
-          } catch (e) {}
+          }
+        } catch (e) {
+          stageVid.muted = true;
+          try { stageVid.play().catch(function () {}); } catch (err) {}
+        }
 
-          // Fade out the black curtain so the transition video appears smoothly from black
-          setTimeout(function () {
-            if (curtain && !isFinishing) curtain.classList.remove('fade-active');
-          }, 90);
+        // Smoothly lift the black curtain so the transition video fades in from black
+        setTimeout(function () {
+          if (curtain && !isFinishing) curtain.classList.remove('fade-active');
+        }, 120);
 
-          const durationMs = config.durationMs || 9800;
-          const startTime = Date.now();
+        const durationMs = config.durationMs || 9800;
+        const startTime = Date.now();
 
-          // Smooth Black Fade Exit into the destination page (never hard-cuts!)
-          onTransitionFinishCallback = function () {
-            if (isFinishing) return;
-            isFinishing = true;
-            if (activeTransitionTimer) clearTimeout(activeTransitionTimer);
-            if (activeProgressInterval) clearInterval(activeProgressInterval);
-            activeTransitionTimer = null;
-            activeProgressInterval = null;
+        // Smooth Black Fade Exit into the destination page (never hard-cuts!)
+        onTransitionFinishCallback = function () {
+          if (isFinishing) return;
+          isFinishing = true;
+          if (activeTransitionTimer) clearTimeout(activeTransitionTimer);
+          if (activeProgressInterval) clearInterval(activeProgressInterval);
+          activeTransitionTimer = null;
+          activeProgressInterval = null;
 
-            if (pctEl) pctEl.textContent = '100%';
-            if (barEl) barEl.style.width = '100%';
+          if (pctEl) pctEl.textContent = '100%';
+          if (barEl) barEl.style.width = '100%';
 
-            runBlackFadeTransition(function () {
-              stopApsaraCinematicSound();
-              try { stageVid.pause(); } catch (e) {}
-              stage.classList.remove('active');
-              const cb = onFinish;
-              onFinish = null;
-              if (cb) cb();
-            }, 180);
-          };
+          runBlackFadeTransition(function () {
+            stopApsaraCinematicSound();
+            try { stageVid.pause(); } catch (e) {}
+            stage.classList.remove('active');
+            const cb = onFinish;
+            onFinish = null;
+            if (cb) cb();
+          }, 180);
+        };
 
-          activeProgressInterval = setInterval(function () {
-            const elapsed = Date.now() - startTime;
-            const rawRatio = Math.min(1, elapsed / durationMs);
-            const pct = Math.min(100, Math.round(rawRatio * 100));
-            if (pctEl) pctEl.textContent = pct + '%';
-            if (barEl) barEl.style.width = (rawRatio * 100).toFixed(1) + '%';
-          }, 40);
+        activeProgressInterval = setInterval(function () {
+          const elapsed = Date.now() - startTime;
+          const rawRatio = Math.min(1, elapsed / durationMs);
+          const pct = Math.min(100, Math.round(rawRatio * 100));
+          if (pctEl) pctEl.textContent = pct + '%';
+          if (barEl) barEl.style.width = (rawRatio * 100).toFixed(1) + '%';
+        }, 40);
 
-          // Trigger the smooth fade-to-black slightly before the video clip ends so it never freezes or hard-cuts
-          activeTransitionTimer = setTimeout(function () {
-            if (onTransitionFinishCallback) onTransitionFinishCallback();
-          }, Math.max(500, durationMs - 550));
-        }, 380);
+        activeTransitionTimer = setTimeout(function () {
+          if (onTransitionFinishCallback) onTransitionFinishCallback();
+        }, Math.max(500, durationMs - 550));
       }
 
       // -------------------------------------------------------------------
@@ -3052,6 +3158,7 @@
       // 10. INITIALIZATION & EVENT LISTENERS
       // -------------------------------------------------------------------
       window.addEventListener('DOMContentLoaded', function () {
+        hydrateBase64MediaToBlobUrls();
         runLyhourPreloader();
 
         // Unlock low-volume audio on first user gesture anywhere if browser initially muted autoplay
@@ -3060,6 +3167,7 @@
           if (audioUnlocked) return;
           audioUnlocked = true;
           ensureAudio();
+          primeAllMobileMediaOnTap();
           const introGateEl = document.getElementById('intro-gate');
           if (introGateEl && !introGateEl.classList.contains('portal-hidden') && soundEnabled) {
             const introVid = document.getElementById('intro-cambodia-video');
