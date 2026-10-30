@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <title>វរ្ម័ន · Varman Chanthou — Cinematic Personal Website & Business Roadmap</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -407,6 +407,81 @@
       font-weight: 700;
     }
 
+  
+    /* ===================================================================== */
+    /* PHONE & MOBILE UX OPTIMIZATIONS (iOS Safari, Android Chrome, 360px+)  */
+    /* ===================================================================== */
+    html, body {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      overscroll-behavior-y: none;
+    }
+
+    /* Dynamic Viewport Height (100dvh) so mobile browser bars never clip full-screen stages */
+    #lyhour-preloader,
+    #intro-gate,
+    #video-transition-stage {
+      height: 100vh;
+      height: 100dvh;
+    }
+
+    /* Safe-area bottom inset for notched phones on the floating bottom dock & transition stage */
+    .safe-bottom-dock {
+      bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+    .safe-stage-bottom {
+      padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Mobile-optimized Roadmap Spine & Node Dot so cards have full width on phones */
+    @media (max-width: 639px) {
+      .roadmap-spine {
+        left: 16px;
+        width: 2.5px;
+      }
+      .roadmap-node-dot {
+        width: 32px;
+        height: 32px;
+        font-size: 0.7rem;
+        border-width: 2px;
+      }
+      .p5-letter-box {
+        width: 1.95rem;
+        height: 2.35rem;
+        font-size: 1.35rem;
+        margin-right: 0.12rem;
+        box-shadow: 3px 3px 0px #000000;
+      }
+      .p5-dispatch-bar {
+        transform: skewX(-2deg);
+      }
+      .p5-dispatch-bar:hover {
+        transform: skewX(-2deg);
+      }
+      /* Prevent iOS Safari auto-zoom when tapping text inputs on phone */
+      input[type="text"],
+      textarea,
+      select {
+        font-size: 16px !important;
+      }
+      /* Disable hover lift on touch devices to avoid sticky hover states */
+      .rifqi-card:hover {
+        transform: none;
+      }
+      .rifqi-card:active {
+        transform: scale(0.985);
+      }
+    }
+
+    /* Hide scrollbar on horizontal pill bars while keeping smooth touch scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
   </style>
 </head>
 <body class="selection:bg-amber-400 selection:text-black">
@@ -435,32 +510,32 @@
     <video
       id="transition-stage-video"
       class="absolute inset-0 w-full h-full object-cover object-center"
-      playsinline
+      playsinline webkit-playsinline="true" x5-playsinline="true"
     ></video>
     <div class="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/65 pointer-events-none"></div>
 
     <!-- Top Overlay Bar inside Video Transition -->
-    <div class="relative z-10 flex items-center justify-between px-6 sm:px-12 pt-6 sm:pt-8">
-      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/40">
+    <div class="relative z-10 flex items-center justify-between gap-2 px-4 sm:px-12 pt-4 sm:pt-8">
+      <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-amber-400/40 max-w-[62%] sm:max-w-none">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span id="transition-stage-badge" class="font-mono-tech text-xs text-amber-300 tracking-widest uppercase">
+        <span id="transition-stage-badge" class="font-mono-tech text-[10px] sm:text-xs text-amber-300 tracking-wider sm:tracking-widest uppercase truncate">
           CINEMATIC PORTAL TRANSITION
         </span>
       </div>
       <button
         id="skip-video-transition-btn"
         type="button"
-        class="px-4 py-2 rounded-full bg-white/15 hover:bg-white hover:text-black backdrop-blur-md border border-white/30 text-xs font-mono-tech text-white font-semibold transition"
+        class="px-3.5 sm:px-4 py-2 rounded-full bg-white/15 hover:bg-white hover:text-black active:scale-95 backdrop-blur-md border border-white/30 text-[11px] sm:text-xs font-mono-tech text-white font-semibold transition shrink-0"
       >
         Skip Transition →
       </button>
     </div>
 
     <!-- Center / Bottom Welcome & Sleek Horizon Loading Bar -->
-    <div class="relative z-10 px-6 sm:px-12 pb-10 sm:pb-14 max-w-3xl mx-auto w-full text-center space-y-5">
+    <div class="relative z-10 px-4 sm:px-12 pb-8 sm:pb-14 safe-stage-bottom max-w-3xl mx-auto w-full text-center space-y-4 sm:space-y-5">
       <div class="space-y-2">
         <p id="transition-stage-khmer" class="hidden font-khmer text-amber-300 text-base sm:text-xl drop-shadow"></p>
-        <h2 id="transition-stage-title" class="font-display text-3xl sm:text-6xl font-black text-white tracking-tight uppercase drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
+        <h2 id="transition-stage-title" class="font-display text-2xl sm:text-6xl font-black text-white tracking-tight uppercase leading-tight drop-shadow-[0_8px_30px_rgba(0,0,0,0.95)]">
           WELCOME TO MY WORLD
         </h2>
         <p id="transition-stage-subtitle" class="text-xs sm:text-base text-zinc-200 max-w-xl mx-auto drop-shadow">
@@ -531,7 +606,7 @@
     <div class="portal-ring portal-ring-2"></div>
     <div class="portal-ring portal-ring-3"></div>
     <div class="relative z-10 text-center px-6 space-y-2">
-      <p class="font-mono-tech text-xs text-amber-300 tracking-[0.3em] uppercase">✦ VARMAN.DEV // SIEM REAP ✦</p>
+      <p class="font-mono-tech text-xs text-amber-300 tracking-[0.3em] uppercase">✦ VARMAN.ME // SIEM REAP ✦</p>
       <p id="transition-overlay-label" class="font-display text-2xl sm:text-5xl font-black text-white tracking-tight uppercase drop-shadow-lg">
         WELCOME TO MY PORTFOLIO
       </p>
@@ -549,7 +624,7 @@
         src="intro_cambodia.mp4"
         autoplay
         loop
-        playsinline
+        playsinline webkit-playsinline="true" x5-playsinline="true"
         class="w-full h-full object-cover object-center"
       ></video>
       <!-- Hidden fallback img tag to preserve id="intro-bg-img" -->
@@ -564,10 +639,10 @@
     <canvas id="falling-stars-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
 
     <!-- Top Utility Controls inside Intro Gate -->
-    <div class="relative z-30 flex flex-wrap items-center justify-between gap-2 px-6 sm:px-12 pt-5 sm:pt-8">
+    <div class="relative z-30 flex flex-wrap items-center justify-between gap-2 px-4 sm:px-12 pt-4 sm:pt-8">
       <div class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/55 backdrop-blur-md border border-white/20">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span id="multilingual-greeting" class="font-mono-tech text-[11px] text-zinc-100 tracking-wider uppercase">
+        <span id="multilingual-greeting" class="font-mono-tech text-[10px] sm:text-[11px] text-zinc-100 tracking-wide sm:tracking-wider uppercase">
           ស្វាគមន៍ · 欢迎 · Bienvenue · Welcome
         </span>
       </div>
@@ -591,7 +666,7 @@
     </div>
 
     <!-- Centerpiece Inside the 59s-Video Frame -->
-    <div class="relative z-30 h-[calc(100vh-150px)] flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+    <div class="relative z-30 h-[calc(100dvh-95px)] sm:h-[calc(100dvh-140px)] flex flex-col items-center justify-center text-center px-4 sm:px-6 max-w-4xl mx-auto overflow-y-auto py-3">
       <p class="text-xs sm:text-base font-medium text-amber-200 tracking-wide drop-shadow mb-3">
         Hello! Welcome to my personal website
       </p>
@@ -608,13 +683,13 @@
       <button
         id="explore-me-btn"
         type="button"
-        class="explore-btn-train group px-9 py-4 sm:px-11 sm:py-4 rounded-full font-display font-extrabold text-sm sm:text-base tracking-wide flex items-center gap-3 cursor-pointer mb-10"
+        class="explore-btn-train group px-8 py-3.5 sm:px-11 sm:py-4 rounded-full font-display font-extrabold text-sm sm:text-base tracking-wide flex items-center gap-3 cursor-pointer mb-6 sm:mb-10 active:scale-95"
       >
         <span>+ Explore me →</span>
       </button>
 
       <!-- 4-Column Horizontal Window Sill Bar (59s Video) -->
-      <div class="w-full max-w-2xl grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 px-4 py-3 rounded-2xl bg-black/45 backdrop-blur-md border border-white/20 text-left">
+      <div class="w-full max-w-2xl grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 px-4 py-3.5 rounded-2xl bg-black/55 backdrop-blur-md border border-white/25 text-left">
         <button type="button" data-gate-jump="about-me" class="gate-jump-btn group flex items-center justify-between pb-1.5 border-b border-white/40 hover:border-amber-300 text-xs text-white transition">
           <span><span class="font-mono-tech text-amber-300 mr-1.5">01</span> About me</span>
           <span class="group-hover:translate-x-1 transition-transform">&gt;</span>
@@ -658,7 +733,7 @@
         id="bg-video-home"
         src="bg_home_space.mp4"
         loop
-        playsinline
+        playsinline webkit-playsinline="true" x5-playsinline="true"
         class="w-full h-full object-cover object-center opacity-90 transition-opacity duration-700"
       ></video>
 
@@ -667,7 +742,7 @@
         id="bg-video-about"
         src="bg_about_physics.mp4"
         loop
-        playsinline
+        playsinline webkit-playsinline="true" x5-playsinline="true"
         class="hidden w-full h-full object-cover object-center opacity-80 transition-opacity duration-700"
       ></video>
 
@@ -677,7 +752,7 @@
         src="bg_business_economy.mp4"
         muted
         loop
-        playsinline
+        playsinline webkit-playsinline="true" x5-playsinline="true"
         class="hidden w-full h-full object-cover object-center opacity-75 transition-opacity duration-700"
       ></video>
 
@@ -694,28 +769,37 @@
     <!-- =================================================================== -->
     <!-- STICKY TOP NAVBAR (1m Video Form)                                   -->
     <!-- =================================================================== -->
-    <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#090D18]/80 border-b border-white/15 shadow-lg">
-      <div class="max-w-6xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#090D18]/85 border-b border-white/15 shadow-lg">
+      <div class="max-w-6xl mx-auto px-3.5 sm:px-8 py-2.5 sm:py-0 sm:h-20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4">
+        <!-- Top Row on Mobile: Brand + Sound Toggle -->
+        <div class="flex items-center justify-between w-full sm:w-auto">
           <button
             id="replay-portal-btn"
             type="button"
-            class="font-display font-bold text-base sm:text-lg text-white hover:text-amber-300 transition flex items-center gap-2"
+            class="font-display font-bold text-base sm:text-lg text-white hover:text-amber-300 active:scale-95 transition flex items-center gap-2"
             title="Return to 59s Cambodia Intro Gate"
           >
-            <span>varman.dev</span>
+            <span>varman.me</span>
             <span class="text-[10px] font-mono-tech px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-amber-300">
               ↺ Intro Gate
             </span>
           </button>
+
+          <button
+            id="sound-toggle-main-mobile"
+            type="button"
+            class="sm:hidden px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/45 text-[11px] font-mono-tech text-amber-200 active:scale-95 transition"
+          >
+            ♪ Sound: ON
+          </button>
         </div>
 
-        <!-- Upgraded Glassmorphic Home Bar Capsule -->
-        <nav aria-label="Main Navigation" class="flex items-center gap-1 sm:gap-1.5 p-1.5 rounded-full bg-black/55 border border-white/15">
+        <!-- Mobile-Friendly Full-Width Segmented Home Bar Capsule (Never wraps or clips on phone!) -->
+        <nav aria-label="Main Navigation" class="w-full sm:w-auto grid grid-cols-4 sm:flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-black/60 border border-white/15 no-scrollbar">
           <button
             type="button"
             data-nav-target="home-hero"
-            class="nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-black bg-amber-400 shadow transition"
+            class="nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-semibold text-black bg-amber-400 shadow transition text-center whitespace-nowrap truncate"
           >
             <span>Home.</span>
             <span class="nav-underline hidden absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full"></span>
@@ -723,7 +807,7 @@
           <button
             type="button"
             data-nav-target="about-me"
-            class="nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition"
+            class="nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition text-center whitespace-nowrap truncate"
           >
             <span>About me</span>
             <span class="nav-underline hidden absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full"></span>
@@ -731,7 +815,7 @@
           <button
             type="button"
             data-nav-target="about-businesses"
-            class="nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition"
+            class="nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition text-center whitespace-nowrap truncate"
           >
             <span>About businesses</span>
             <span class="nav-underline hidden absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full"></span>
@@ -739,7 +823,7 @@
           <button
             type="button"
             data-nav-target="contact"
-            class="nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition"
+            class="nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition text-center whitespace-nowrap truncate"
           >
             <span>Contact</span>
             <span class="nav-underline hidden absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full"></span>
@@ -749,7 +833,7 @@
         <button
           id="sound-toggle-main"
           type="button"
-          class="px-3.5 py-1.5 rounded-full bg-amber-400/20 hover:bg-amber-400/35 border border-amber-300/45 text-xs font-mono-tech text-amber-200 transition"
+          class="hidden sm:inline-flex px-3.5 py-1.5 rounded-full bg-amber-400/20 hover:bg-amber-400/35 border border-amber-300/45 text-xs font-mono-tech text-amber-200 transition shrink-0"
         >
           ♪ Chime: ON
         </button>
@@ -780,7 +864,7 @@
             </h2>
 
             <!-- Typewriter Role Subtitle (No studies/school mentioned on Main Page!) -->
-            <div class="flex items-center gap-1.5 text-xl sm:text-2xl font-medium text-amber-200 h-9 drop-shadow">
+            <div class="flex items-center gap-1.5 text-base sm:text-2xl font-medium text-amber-200 min-h-[2.75rem] sm:h-9 leading-snug drop-shadow">
               <span id="typewriter-role-text">Financial Trader &amp; Entrepreneur</span>
               <span class="inline-block w-0.5 h-6 bg-amber-300 animate-pulse"></span>
             </div>
@@ -846,7 +930,7 @@
           <div class="lg:col-span-5 flex flex-col items-center">
             <div class="lanyard-wrapper w-full max-w-[285px] flex flex-col items-center">
               <div class="w-7 h-20 bg-[#111520] border-x border-white/30 flex flex-col items-center justify-around py-2 shadow-xl">
-                <span class="font-mono-tech text-[9px] text-zinc-200 -rotate-90 tracking-widest whitespace-nowrap">varman.dev</span>
+                <span class="font-mono-tech text-[9px] text-zinc-200 -rotate-90 tracking-widest whitespace-nowrap">varman.me</span>
               </div>
               <div class="w-10 h-3.5 rounded-sm bg-gradient-to-r from-zinc-400 via-white to-zinc-400 shadow-md"></div>
               <div class="w-4 h-3 bg-zinc-300 rounded-b-sm -mt-0.5 mb-1"></div>
@@ -1133,21 +1217,21 @@
           <button
             type="button"
             data-showcase-tab="projects"
-            class="showcase-tab-btn py-2.5 px-4 rounded-full text-xs sm:text-sm font-semibold bg-white text-black shadow transition"
+            class="showcase-tab-btn py-2.5 px-2 sm:px-4 rounded-full text-[11px] sm:text-sm font-semibold bg-white text-black shadow transition leading-tight"
           >
             Projects &amp; Businesses
           </button>
           <button
             type="button"
             data-showcase-tab="certificates"
-            class="showcase-tab-btn py-2.5 px-4 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition"
+            class="showcase-tab-btn py-2.5 px-2 sm:px-4 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white transition leading-tight"
           >
             Milestones &amp; Honors
           </button>
           <button
             type="button"
             data-showcase-tab="techstack"
-            class="showcase-tab-btn py-2.5 px-4 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition"
+            class="showcase-tab-btn py-2.5 px-2 sm:px-4 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white transition leading-tight"
           >
             Tech Stack &amp; Skills
           </button>
@@ -1408,7 +1492,7 @@
                     <p class="font-mono-tech text-xs text-zinc-300">+855 98 730 031 (+855 98730031)</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2 self-end sm:self-center">
+                <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0 text-center">
                   <button
                     type="button"
                     data-copy-value="+855 98 730 031"
@@ -1438,7 +1522,7 @@
                     <p class="font-mono-tech text-xs text-zinc-300 truncate">www.linkedin.com/in/varmanchanthou</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2 self-end sm:self-center">
+                <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0 text-center">
                   <button
                     type="button"
                     data-copy-value="https://www.linkedin.com/in/varmanchanthou"
@@ -1468,7 +1552,7 @@
                     <p class="font-mono-tech text-xs text-zinc-300">t.me/meowtrading2026</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2 self-end sm:self-center">
+                <div class="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0 text-center">
                   <button
                     type="button"
                     data-copy-value="https://t.me/meowtrading2026"
@@ -1573,12 +1657,12 @@
     <!-- =================================================================== -->
     <!-- FLOATING BOTTOM PILL DOCK + FOOTER                                  -->
     <!-- =================================================================== -->
-    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-2xl pointer-events-auto">
-      <div class="luxury-home-dock px-3 sm:px-4 py-2 rounded-full flex items-center justify-between gap-2 text-xs">
+    <div class="fixed safe-bottom-dock left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-2xl pointer-events-auto">
+      <div class="luxury-home-dock px-2.5 sm:px-4 py-2 rounded-full flex items-center justify-between gap-1.5 sm:gap-2 text-xs">
         <button
           type="button"
           data-dock-jump="home-hero"
-          class="dock-nav-link luxury-home-pill px-4 py-1.5 rounded-full font-display font-extrabold text-xs sm:text-sm tracking-tight shrink-0"
+          class="dock-nav-link luxury-home-pill px-3.5 sm:px-4 py-1.5 rounded-full font-display font-extrabold text-xs sm:text-sm tracking-tight shrink-0 active:scale-95"
         >
           Home.
         </button>
@@ -1586,11 +1670,11 @@
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="live-siem-reap-clock">Siem Reap, KH</span>
         </div>
-        <div class="flex items-center gap-1 font-mono-tech text-[11px] sm:text-xs">
-          <button type="button" data-dock-jump="about-me" class="dock-nav-link dock-item-pill">about</button>
-          <button type="button" data-dock-jump="about-timeline-panel" class="dock-nav-link dock-item-pill">journey</button>
-          <button type="button" data-dock-jump="about-businesses" class="dock-nav-link dock-item-pill">businesses</button>
-          <button type="button" data-dock-jump="contact" class="dock-nav-link dock-item-pill">contact</button>
+        <div class="flex items-center justify-end gap-0.5 sm:gap-1 font-mono-tech text-[11px] sm:text-xs overflow-x-auto no-scrollbar">
+          <button type="button" data-dock-jump="about-me" class="dock-nav-link dock-item-pill whitespace-nowrap">about</button>
+          <button type="button" data-dock-jump="about-timeline-panel" class="dock-nav-link dock-item-pill whitespace-nowrap">journey</button>
+          <button type="button" data-dock-jump="about-businesses" class="dock-nav-link dock-item-pill whitespace-nowrap">businesses</button>
+          <button type="button" data-dock-jump="contact" class="dock-nav-link dock-item-pill whitespace-nowrap">contact</button>
         </div>
       </div>
     </div>
@@ -1952,8 +2036,10 @@
       function updateSoundButtons() {
         const introLabel = document.getElementById('sound-icon-intro');
         const mainBtn = document.getElementById('sound-toggle-main');
+        const mainMobBtn = document.getElementById('sound-toggle-main-mobile');
         if (introLabel) introLabel.textContent = soundEnabled ? '♪ Sound: ON' : '♪ Sound: OFF';
         if (mainBtn) mainBtn.textContent = soundEnabled ? '♪ Chime: ON' : '♪ Chime: OFF';
+        if (mainMobBtn) mainMobBtn.textContent = soundEnabled ? '♪ Sound: ON' : '♪ Sound: OFF';
 
         const introGateEl = document.getElementById('intro-gate');
         if (introGateEl && !introGateEl.classList.contains('portal-hidden')) {
@@ -2630,9 +2716,9 @@
           const domainClean = b.url.replace('https://', '').replace(/\/$/, '');
 
           return (
-            '<div id="' + b.id + '" class="relative grid grid-cols-1 lg:grid-cols-2 items-center pl-14 lg:pl-0">' +
+            '<div id="' + b.id + '" class="relative grid grid-cols-1 lg:grid-cols-2 items-center pl-11 sm:pl-14 lg:pl-0">' +
               '<!-- Roadmap Numbered Milestone Node -->' +
-              '<div class="roadmap-node-dot absolute left-1 lg:left-1/2 lg:-translate-x-1/2 top-6 z-20 font-mono-tech text-xs">' +
+              '<div class="roadmap-node-dot absolute left-0 sm:left-1 lg:left-1/2 lg:-translate-x-1/2 top-6 z-20 font-mono-tech text-xs">' +
                 b.step +
               '</div>' +
               '<div class="' + colPlacement + '">' +
@@ -2731,8 +2817,8 @@
           const match = btn.getAttribute('data-nav-target') === resolvedView;
           const underline = btn.querySelector('.nav-underline');
           btn.className = match
-            ? 'nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-black bg-amber-400 shadow transition'
-            : 'nav-tab-btn relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition';
+            ? 'nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-semibold text-black bg-amber-400 shadow transition text-center whitespace-nowrap truncate'
+            : 'nav-tab-btn relative px-2 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 transition text-center whitespace-nowrap truncate';
           if (underline) underline.classList.add('hidden');
         });
 
@@ -2985,6 +3071,7 @@
           }
         }
         window.addEventListener('pointerdown', unlockAudioOnGesture, { once: true });
+        window.addEventListener('touchstart', unlockAudioOnGesture, { once: true, passive: true });
         window.addEventListener('keydown', unlockAudioOnGesture, { once: true });
 
         const skipPreBtn = document.getElementById('skip-preloader-btn');
@@ -3138,7 +3225,8 @@
         // Sound Toggles
         const soundIntro = document.getElementById('sound-toggle-intro');
         const soundMain = document.getElementById('sound-toggle-main');
-        [soundIntro, soundMain].forEach(function (btn) {
+        const soundMainMob = document.getElementById('sound-toggle-main-mobile');
+        [soundIntro, soundMain, soundMainMob].forEach(function (btn) {
           if (btn) {
             btn.addEventListener('click', function () {
               soundEnabled = !soundEnabled;
@@ -3163,6 +3251,20 @@
             tiltCard.style.transform = '';
             tiltCard.style.animation = 'lanyardSwing 5.5s ease-in-out infinite';
           });
+          tiltCard.addEventListener('touchmove', function (e) {
+            if (!e.touches || !e.touches[0]) return;
+            const touch = e.touches[0];
+            const rect = tiltCard.getBoundingClientRect();
+            const relX = Math.max(-0.6, Math.min(0.6, (touch.clientX - rect.left) / rect.width - 0.5));
+            const relY = Math.max(-0.6, Math.min(0.6, (touch.clientY - rect.top) / rect.height - 0.5));
+            tiltCard.style.animation = 'none';
+            tiltCard.style.transform =
+              'rotateY(' + (relX * 20) + 'deg) rotateX(' + (-relY * 20) + 'deg) scale(1.02)';
+          }, { passive: true });
+          tiltCard.addEventListener('touchend', function () {
+            tiltCard.style.transform = '';
+            tiltCard.style.animation = 'lanyardSwing 5.5s ease-in-out infinite';
+          }, { passive: true });
         }
 
         // Separated Page Navigation Listeners (Navbar, Pills, Dock)
@@ -3249,8 +3351,8 @@
           document.querySelectorAll('.showcase-tab-btn').forEach(function (b) {
             const isMatch = b.getAttribute('data-showcase-tab') === tabName;
             b.className = isMatch
-              ? 'showcase-tab-btn py-2.5 px-4 rounded-full text-xs sm:text-sm font-semibold bg-white text-black shadow transition'
-              : 'showcase-tab-btn py-2.5 px-4 rounded-full text-xs sm:text-sm font-medium text-zinc-300 hover:text-white transition';
+              ? 'showcase-tab-btn py-2.5 px-2 sm:px-4 rounded-full text-[11px] sm:text-sm font-semibold bg-white text-black shadow transition leading-tight'
+              : 'showcase-tab-btn py-2.5 px-2 sm:px-4 rounded-full text-[11px] sm:text-sm font-medium text-zinc-300 hover:text-white transition leading-tight';
           });
           if (panelProjects) panelProjects.classList.toggle('hidden', tabName !== 'projects');
           if (panelCerts) panelCerts.classList.toggle('hidden', tabName !== 'certificates');
